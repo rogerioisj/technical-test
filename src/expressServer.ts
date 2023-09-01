@@ -1,9 +1,10 @@
-import express, {Express, Request, Response, Router} from "express";
+import express, { Express, Request, Response, Router } from "express";
+import { Server } from "http";
 
-export class Server {
+export class ExpressServer {
     private readonly app: Express;
     private port: number = 3000;
-    private server: any;
+    private server: Server = {} as Server;
 
     constructor() {
         this.app = express();
@@ -17,8 +18,8 @@ export class Server {
         });
     }
 
-    public async close(): Promise<void> {
-        await this.server.close()
+    public close(): void {
+        this.server.close()
     }
 
     public getApp(): Express {
@@ -30,7 +31,12 @@ export class Server {
         this.port = port;
     }
 
-    public setRoutes(routes: Router): void {
-        this.app.use('/api', routes);
+    public setRoutes(routes: Router, prefix?: string): void {
+        if (!routes) throw new Error('Invalid routes');
+        if (prefix) {
+            this.app.use(prefix, routes);
+            return;
+        }
+        this.app.use(routes);
     }
 }
