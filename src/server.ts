@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from "express";
+import express, {Express, Request, Response, Router} from "express";
 
 export class Server {
     private readonly app: Express;
@@ -9,20 +9,6 @@ export class Server {
         this.app = express();
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
-        this.initRoutes();
-    }
-
-    private initRoutes(): void {
-        this.app.get('/', this.helloWorld);
-        this.app.get('/2', this.hello);
-    }
-
-    private async helloWorld(req: Request, res: Response): Promise<void> {
-        res.send('Hello World!');
-    }
-
-    private async hello(req: Request, res: Response): Promise<void> {
-        res.send('Hello!');
     }
 
     public start(): void {
@@ -40,6 +26,11 @@ export class Server {
     }
 
     public setPort(port: number): void {
+        if (!port || port < 0 || port > 65535 || isNaN(port)) throw new Error('Invalid port');
         this.port = port;
+    }
+
+    public setRoutes(routes: Router): void {
+        this.app.use(routes);
     }
 }
