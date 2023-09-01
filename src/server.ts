@@ -12,26 +12,26 @@ export class Server {
         this.initRoutes();
     }
 
-    private initRoutes() {
+    private initRoutes(): void {
         this.app.get('/', this.helloWorld);
         this.app.get('/2', this.hello);
     }
 
-    private async helloWorld(req: Request, res: Response) {
+    private async helloWorld(req: Request, res: Response): Promise<void> {
         res.send('Hello World!');
     }
 
-    private async hello(req: Request, res: Response) {
+    private async hello(req: Request, res: Response): Promise<void> {
         res.send('Hello!');
     }
 
-    public start() {
+    public start(): void {
         this.server = this.app.listen(this.port, () => {
             console.log(`Listening on port ${this.port}`);
         });
     }
 
-    public async close() {
+    public async close(): Promise<void> {
         await this.server.close()
     }
 
@@ -39,7 +39,7 @@ export class Server {
         return this.app;
     }
 
-    public setPort(port: number) {
+    public setPort(port: number): void {
         this.port = port;
     }
 }
