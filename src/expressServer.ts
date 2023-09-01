@@ -31,6 +31,10 @@ export class ExpressServer {
         this.port = port;
     }
 
+    public getPort(): number {
+        return this.port;
+    }
+
     public setRoutes(routes: Router, prefix?: string): void {
         if (!routes) throw new Error('Invalid routes');
         if (prefix) {
