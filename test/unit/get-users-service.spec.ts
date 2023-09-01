@@ -2,7 +2,7 @@ import { describe, expect, test } from '@jest/globals';
 import { GetUsersService } from '../../src/useCases/get-users.service';
 import { UserRepository } from "../../src/database/repositories/user.repository";
 import { AddUsersService } from "../../src/useCases/add-users.service";
-import {UserModel} from "../../src/models/user.model";
+import { UserModel } from "../../src/models/user.model";
 
 describe('Given an instance of GetUsersService', () => {
     const userRepository = new UserRepository();
