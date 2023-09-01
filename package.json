@@ -2,7 +2,9 @@
   "name": "techinical-test",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "index.js",
+  "author": "Roger Inacio",
+  "license": "No License",
   "directories": {
     "test": "test"
   },
@@ -13,8 +15,6 @@
     "test": "npx jest",
     "test:watch": "npx jest --watchAll"
   },
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@types/express": "^4.17.17",
     "@types/jest": "^29.5.4",
