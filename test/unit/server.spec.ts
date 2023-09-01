@@ -65,5 +65,4 @@ describe('Given an instance of ExpressServer', () => {
             server.setRoutes(undefined as any);
         }).toThrow();
     });
-
 });
