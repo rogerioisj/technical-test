@@ -1,4 +1,4 @@
-import express, { Express, Request, Response, Router } from "express";
+import express, { Express, Router } from "express";
 import { Server } from "http";
 
 export class ExpressServer {
@@ -39,4 +39,31 @@ export class ExpressServer {
         }
         this.app.use(routes);
     }
+
+    public getRoutes() {
+        const routes: Route[] = []
+        this.app._router.stack.map((r: any) => {
+            if (r.name === 'router') {
+                const prefix =  r.regexp.toString().replace(/\/\^|\/\?|\/\$/g, '').replace('(?=\\/|$)', '').replace(/\\(.)/g, '$1').replace(/\/i\n/g, '').replace(/\/i$/, '');
+                r.handle.stack?.map((r: any) => {
+                    const path = r.route?.path;
+                    r.route?.stack?.map((r: any) => {
+                        routes.push({
+                            path: path,
+                            method: r.method,
+                            prefix: prefix
+                        })
+                    })
+                })
+            }
+        })
+
+        return routes;
+    }
+}
+
+interface Route {
+    path: string;
+    method: string;
+    prefix?: string;
 }
