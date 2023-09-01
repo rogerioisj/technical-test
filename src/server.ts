@@ -31,6 +31,6 @@ export class Server {
     }
 
     public setRoutes(routes: Router): void {
-        this.app.use(routes);
+        this.app.use('/api', routes);
     }
 }
