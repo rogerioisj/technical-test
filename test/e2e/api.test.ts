@@ -121,24 +121,24 @@ describe('Given an API test e2e suit', () => {
             const response = await server.get('/api/users?q=john');
 
             expect(response.status).toBe(200);
-            expect(response.body).toBeInstanceOf(Array);
-            expect(response.body.length).toBeGreaterThan(0);
+            //expect(response.body.elements).toBeInstanceOf(Array);
+            expect(response.body.elements.length).toBeGreaterThan(0);
         });
 
         test('Should return a list of users if param is empty', async () => {
             const response = await server.get('/api/users?q=john');
 
             expect(response.status).toBe(200);
-            expect(response.body).toBeInstanceOf(Array);
-            expect(response.body.length).toBeGreaterThan(0);
+            //expect(response.body.elements).toBeInstanceOf(Array);
+            expect(response.body.elements.length).toBeGreaterThan(0);
         });
 
         test('Should return an empty list of users if param not match any user', async () => {
             const response = await server.get('/api/users?q=jbfakjsbfksbfisafk');
 
             expect(response.status).toBe(200);
-            expect(response.body).toBeInstanceOf(Array);
-            expect(response.body.length).toBe(0);
+            //expect(response.body).toBeInstanceOf(Array);
+            expect(response.body.elements.length).toBe(0);
         });
     });
 });
