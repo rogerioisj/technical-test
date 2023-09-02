@@ -1,6 +1,7 @@
 import { UserModel } from "../../models/user.model";
+import { UserRepositoryInterface } from "./user-repository.interface";
 
-export class UserRepository {
+export class UserRepository implements UserRepositoryInterface {
     private database: UserModel[];
     constructor() {
         this.database = [];
