@@ -11,7 +11,7 @@ const userRepository = new UserRepository();
 const getUsersService = new GetUsersService(userRepository);
 const addUserService = new AddUsersService(userRepository);
 const processCsvFileService = new ProcessCsvFileService(addUserService);
-const userController = new UserController(getUsersService, addUserService, processCsvFileService);
+const userController = new UserController(getUsersService, processCsvFileService);
 
 server.setRoutes(userController.getRoutes(), '/api');
 
