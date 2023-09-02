@@ -30,17 +30,19 @@ export class UserController {
     }
 
     private getUsers(req: Request, res: Response){
-        const { q } = req.query;
+        const { q, page, limit } = req.query;
         let query: string;
+        let pageInt: undefined | number;
+        let limitInt: undefined | number;
 
-        if (!q) {
-            query = '';
-        } else {
-            query = q.toString();
-        }
+        query = !q ? '' : query = q.toString();
+
+        pageInt = page === undefined ? undefined :  parseInt(page.toString());
+
+        limitInt = limit === undefined ?  undefined : parseInt(limit.toString());
 
         try {
-            const users = this.getUsersService.execute(query);
+            const users = this.getUsersService.execute(query, pageInt, limitInt);
             res.status(200).send(users);
             return;
         } catch (e) {
