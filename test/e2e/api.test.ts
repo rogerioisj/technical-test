@@ -85,8 +85,8 @@ describe('Given an API test e2e suit', () => {
             expect(response.body.message).toBe('Content-Type must be multipart/form-data');
         });
 
-        test.skip('Should fail to create users if file is not sent', async () => {
-            const response = await server.post('/api/files').attach('files', null as any).set('Content-Type', 'multipart/form-data');
+        test('Should fail to create users if file is not sent', async () => {
+            const response = await server.post('/api/files').attach('files', null as any).set('Content-Type', 'multipart/form-data;');
 
             expect(response.status).toBe(400);
             expect(response.body.message).toBe('No file uploaded');
@@ -97,12 +97,12 @@ describe('Given an API test e2e suit', () => {
 
             const response = await server
                 .post('/api/files')
-                .attach('file', filePathMock)
-                .set('Content-Type', 'multipart/form-data')
+                .attach('ghfhhfhf', filePathMock)
+                .set('Content-Type', 'multipart/form-data;')
             ;
 
             expect(response.status).toBe(400);
-            expect(response.text).toBe('Users created');
+            expect(response.body.message).toBe('Invalid field name');
         });
     })
 
