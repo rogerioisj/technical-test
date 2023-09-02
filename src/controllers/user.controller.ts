@@ -5,22 +5,21 @@ import Multer from 'multer';
 import { StorageMiddleware } from "../middlewares/storage.middleware";
 import {UploadCsvMiddleware} from "../middlewares/upload-csv.middleware";
 import { ProcessCsvFileServiceInterface } from "../useCases/interfaces/process-csv-file-service.interface";
+import { ErrorHandleMiddleware } from "../middlewares/error-handle.middleware";
+import { UploadErrors } from "../errors/upload.errors";
 
 export class UserController {
     private storageMiddleware = Multer.diskStorage(new StorageMiddleware())
     private upload = Multer({ storage: this.storageMiddleware, fileFilter: UploadCsvMiddleware.CheckFile } );
     private router = Router();
     private readonly getUsersService: GetUsersServiceInterface;
-    private readonly addUserService: AddUserServiceInterface;
     private readonly processCsvFileService: ProcessCsvFileServiceInterface;
 
-    constructor(getUsersService: GetUsersServiceInterface, addUserService: AddUserServiceInterface, processCsvFileService: ProcessCsvFileServiceInterface) {
+    constructor(getUsersService: GetUsersServiceInterface, processCsvFileService: ProcessCsvFileServiceInterface) {
         this.getUsersService = getUsersService;
-        this.addUserService = addUserService;
         this.processCsvFileService = processCsvFileService;
 
         this.getUsers = this.getUsers.bind(this);
-        this.addUser = this.addUser.bind(this);
         this.uploadCsv = this.uploadCsv.bind(this);
 
         this.initRoutes();
@@ -50,26 +49,15 @@ export class UserController {
         }
     }
 
-    private async addUser(req: Request, res: Response): Promise<void> {
-        const { name, city, country, favorite_sport } = req.body;
-        if (!name || !city || !country || !favorite_sport) {
-            res.status(400).send('Invalid user data');
-            return;
-        }
-
-        try {
-            this.addUserService.execute(name, city, country, favorite_sport);
-            res.status(201).send('User created');
-        } catch (e) {
-            console.log(e)
-            res.status(500).send('Internal error');
-        }
-    }
-
     private async uploadCsv(req: any, res: Response): Promise<void> {
         try {
             if(req.fileValidationError) {
                 res.status(400).send({ message: req.fileValidationError });
+                return ;
+            }
+
+            if(!req.file) {
+                res.status(400).send({ message: UploadErrors.NO_FILE_UPLOADED });
                 return ;
             }
 
@@ -83,8 +71,7 @@ export class UserController {
     }
 
     private initRoutes(): void {
-        this.router.get('/users', this.getUsers);
-        this.router.post('/user', this.addUser);
-        this.router.post('/files', UploadCsvMiddleware.CheckHeader, this.upload.single(`files`), this.uploadCsv);
+        this.router.get('/users', this.getUsers, ErrorHandleMiddleware.handle);
+        this.router.post('/files', UploadCsvMiddleware.CheckHeader, this.upload.single(`files`), this.uploadCsv, ErrorHandleMiddleware.handle);
     }
 }
