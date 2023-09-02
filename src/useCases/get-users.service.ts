@@ -1,5 +1,4 @@
 import {UserRepositoryInterface} from "../database/repositories/user-repository.interface";
-import { UserModel } from "../models/user.model";
 import { GetUsersServiceInterface } from "./interfaces/get-users-service.interface";
 
 export class GetUsersService implements GetUsersServiceInterface {
@@ -9,7 +8,7 @@ export class GetUsersService implements GetUsersServiceInterface {
         this.repository = repository;
     }
 
-    public execute(query: string, page?: number, limit?: number): UserModel[] {
+    public execute(query: string, page?: number, limit?: number) {
         return this.repository.searchUsers(query, page, limit);
     }
 }
