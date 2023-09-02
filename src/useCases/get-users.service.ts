@@ -9,7 +9,7 @@ export class GetUsersService implements GetUsersServiceInterface {
         this.repository = repository;
     }
 
-    public execute(query: string): UserModel[] {
-        return this.repository.searchUsers(query);
+    public execute(query: string, page?: number, limit?: number): UserModel[] {
+        return this.repository.searchUsers(query, page, limit);
     }
 }
