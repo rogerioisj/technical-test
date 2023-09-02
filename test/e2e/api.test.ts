@@ -6,6 +6,7 @@ import { AddUsersService } from "../../src/useCases/add-users.service";
 import { GetUsersService } from "../../src/useCases/get-users.service";
 import { ProcessCsvFileService } from "../../src/useCases/process-csv-file.service";
 import { UserRepository } from "../../src/database/repositories/user.repository";
+import { AppController } from "../../src/controllers/app.controller";
 
 describe('Given an API test e2e suit', () => {
     const serverInstance = new ExpressServer();
@@ -13,15 +14,19 @@ describe('Given an API test e2e suit', () => {
     let port = 3001;
 
     let sut: UserController;
+    let testRoutes: AppController;
 
     beforeEach(async () => {
         const repository = new UserRepository();
         const addUserService = new AddUsersService(repository);
         const getUserService = new GetUsersService(repository);
         const processCsvFileService = new ProcessCsvFileService(addUserService);
-        sut = new UserController(getUserService, addUserService, processCsvFileService);
+        sut = new UserController(getUserService, processCsvFileService);
+
+        testRoutes = new AppController();
 
         serverInstance.setRoutes(sut.getRoutes(), '/api');
+        serverInstance.setRoutes(testRoutes.getRoutes());
         serverInstance.setPort(port);
         serverInstance.start();
         server = supertest(serverInstance.getApp());
@@ -31,53 +36,109 @@ describe('Given an API test e2e suit', () => {
         serverInstance.close();
     });
 
-    test.skip('Should return a hello world message', async () => {
-        const response = await server.get('/');
+    describe('When test endpoints without prefix', () => {
+        test('Should return a hello world message', async () => {
+            const response = await server.get('/');
 
-        expect(response.status).toBe(200);
-        expect(response.text).toBe('Hello World!');
+            expect(response.status).toBe(200);
+            expect(response.text).toBe('Hello World!');
+        });
+
+        test('Should return a hello message', async () => {
+            const response = await server.get('/2');
+
+            expect(response.status).toBe(200);
+            expect(response.text).toBe('Hello!');
+        });
     });
 
-    test.skip('Should return a hello message', async () => {
-        const response = await server.get('/2');
+    describe('And in a user save flow', () => {
+        test('Should save a list of users based on a csv file', async () => {
+            const filePathMock: string = 'test/mocks/users.csv';
 
-        expect(response.status).toBe(200);
-        expect(response.text).toBe('Hello!');
-    });
+            const response = await server
+                .post('/api/files')
+                .attach('files', filePathMock)
+                .set('Content-Type', 'multipart/form-data')
+            ;
 
-    test('Should save a list of users based on a csv file', async () => {
-        const filePathMock: string = 'test/mocks/users.csv';
+            expect(response.status).toBe(201);
+            expect(response.text).toBe('Users created');
+        });
 
-        const response = await server
-            .post('/api/files')
-            .attach('files', filePathMock)
-            .set('Content-Type', 'multipart/form-data')
-        ;
+        test('Should fail to create users if file is not a csv', async () => {
+            const filePathMock: string = 'test/mocks/users.txt';
 
-        expect(response.status).toBe(201);
-        expect(response.text).toBe('Users created');
-    });
+            const response = await server.post('/api/files').attach('files', filePathMock);
 
-    test('Should fail to create users if file is not a csv', async () => {
-        const filePathMock: string = 'test/mocks/users.txt';
+            expect(response.status).toBe(400);
+            expect(response.body.message).toBe('mimetype not allowed');
+        })
 
-        const response = await server.post('/api/files').attach('files', filePathMock);
+        test('Should fail to create users if header is not multipart/form-data', async () => {
+            const response = await server
+                .post('/api/files')
+                .set('Content-Type', 'anything')
+            ;
 
-        expect(response.status).toBe(400);
-        expect(response.body.message).toBe('mimetype not allowed');
+            expect(response.status).toBe(400);
+            expect(response.body.message).toBe('Content-Type must be multipart/form-data');
+        });
+
+        test.skip('Should fail to create users if file is not sent', async () => {
+            const response = await server.post('/api/files').attach('files', null as any).set('Content-Type', 'multipart/form-data');
+
+            expect(response.status).toBe(400);
+            expect(response.body.message).toBe('No file uploaded');
+        });
+
+        test.skip('Should fail to create users if field name is different of `files`', async () => {
+            const filePathMock: string = 'test/mocks/users.csv';
+
+            const response = await server
+                .post('/api/files')
+                .attach('file', filePathMock)
+                .set('Content-Type', 'multipart/form-data')
+            ;
+
+            expect(response.status).toBe(400);
+            expect(response.text).toBe('Users created');
+        });
     })
 
-    test('Should fail to create users header is not multipart/form-data', async () => {
-        const filePathMock: string = 'test/mocks/users.txt';
+    describe('And in a user get flow', () => {
+        beforeAll(async () => {
+            const filePathMock: string = 'test/mocks/users.csv';
 
-        const response = await server
-            .post('/api/files')
-            .set('Content-Type', 'anything')
-        ;
+            await server
+                .post('/api/files')
+                .attach('files', filePathMock)
+                .set('Content-Type', 'multipart/form-data')
+            ;
+        });
 
-        expect(response.status).toBe(400);
-        expect(response.body.message).toBe('Content-Type must be multipart/form-data');
+        test('Should return a list of users based on query params', async () => {
+            const response = await server.get('/api/users?q=john');
+
+            expect(response.status).toBe(200);
+            expect(response.body).toBeInstanceOf(Array);
+            expect(response.body.length).toBeGreaterThan(0);
+        });
+
+        test('Should return a list of users if param is empty', async () => {
+            const response = await server.get('/api/users?q=john');
+
+            expect(response.status).toBe(200);
+            expect(response.body).toBeInstanceOf(Array);
+            expect(response.body.length).toBeGreaterThan(0);
+        });
+
+        test('Should return an empty list of users if param not match any user', async () => {
+            const response = await server.get('/api/users?q=jbfakjsbfksbfisafk');
+
+            expect(response.status).toBe(200);
+            expect(response.body).toBeInstanceOf(Array);
+            expect(response.body.length).toBe(0);
+        });
     });
-
-    test.todo('Should return a list of users based on query params');
 });
