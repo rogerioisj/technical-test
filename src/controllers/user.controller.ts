@@ -75,7 +75,7 @@ export class UserController {
 
             this.processCsvFileService.execute(req.file.path);
 
-            res.status(201).send(`result`);
+            res.status(201).send(`Users created`);
         } catch (e) {
             console.log('ERROR', e)
             res.status(500).send('Internal error');
