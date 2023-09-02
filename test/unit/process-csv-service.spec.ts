@@ -29,6 +29,6 @@ describe('Given an instance of ProcessCsvFileService', () => {
         copyFileSync(filePathMock, filePath)
         await sut.execute(filePath);
         const result = getUsersService.execute('');
-        expect(result.length).toBe(6);
+        expect(result.elements.length).toBe(6);
     });
 });
