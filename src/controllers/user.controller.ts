@@ -4,20 +4,25 @@ import { AddUserServiceInterface } from "../useCases/interfaces/add-user-service
 import Multer from 'multer';
 import { StorageMiddleware } from "../middlewares/storage.middleware";
 import {UploadCsvMiddleware} from "../middlewares/upload-csv.middleware";
+import { ProcessCsvFileServiceInterface } from "../useCases/interfaces/process-csv-file-service.interface";
 
 export class UserController {
     private storageMiddleware = Multer.diskStorage(new StorageMiddleware())
     private upload = Multer({ storage: this.storageMiddleware, fileFilter: UploadCsvMiddleware.CheckFile } );
     private router = Router();
-    private getUsersService: GetUsersServiceInterface;
-    private addUserService: AddUserServiceInterface;
+    private readonly getUsersService: GetUsersServiceInterface;
+    private readonly addUserService: AddUserServiceInterface;
+    private readonly processCsvFileService: ProcessCsvFileServiceInterface;
 
-    constructor(getUsersService: GetUsersServiceInterface, addUserService: AddUserServiceInterface) {
+    constructor(getUsersService: GetUsersServiceInterface, addUserService: AddUserServiceInterface, processCsvFileService: ProcessCsvFileServiceInterface) {
         this.getUsersService = getUsersService;
         this.addUserService = addUserService;
+        this.processCsvFileService = processCsvFileService;
 
         this.getUsers = this.getUsers.bind(this);
         this.addUser = this.addUser.bind(this);
+        this.uploadCsv = this.uploadCsv.bind(this);
+
         this.initRoutes();
     }
 
@@ -67,6 +72,8 @@ export class UserController {
                 res.status(400).send({ message: req.fileValidationError });
                 return ;
             }
+
+            this.processCsvFileService.execute(req.file.path);
 
             res.status(201).send(`result`);
         } catch (e) {
