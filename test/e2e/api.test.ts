@@ -1,5 +1,5 @@
-import { describe, expect } from '@jest/globals';
-import supertest, { Test } from 'supertest';
+import { describe, expect, test } from '@jest/globals';
+import supertest from 'supertest';
 import { ExpressServer } from '../../src/expressServer';
 import { UserController } from "../../src/controllers/user.controller";
 import { AddUsersService } from "../../src/useCases/add-users.service";
@@ -21,13 +21,13 @@ describe('Given an API test e2e suit', () => {
         const processCsvFileService = new ProcessCsvFileService(addUserService);
         sut = new UserController(getUserService, addUserService, processCsvFileService);
 
-        serverInstance.setRoutes(sut.getRoutes());
+        serverInstance.setRoutes(sut.getRoutes(), '/api');
         serverInstance.setPort(port);
         serverInstance.start();
         server = supertest(serverInstance.getApp());
     });
 
-    afterEach(() => {
+    afterEach(async () => {
         serverInstance.close();
     });
 
@@ -45,7 +45,39 @@ describe('Given an API test e2e suit', () => {
         expect(response.text).toBe('Hello!');
     });
 
-    test.todo('Should save a list of users based on a csv file');
+    test('Should save a list of users based on a csv file', async () => {
+        const filePathMock: string = 'test/mocks/users.csv';
+
+        const response = await server
+            .post('/api/files')
+            .attach('files', filePathMock)
+            .set('Content-Type', 'multipart/form-data')
+        ;
+
+        expect(response.status).toBe(201);
+        expect(response.text).toBe('Users created');
+    });
+
+    test('Should fail to create users if file is not a csv', async () => {
+        const filePathMock: string = 'test/mocks/users.txt';
+
+        const response = await server.post('/api/files').attach('files', filePathMock);
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toBe('mimetype not allowed');
+    })
+
+    test('Should fail to create users header is not multipart/form-data', async () => {
+        const filePathMock: string = 'test/mocks/users.txt';
+
+        const response = await server
+            .post('/api/files')
+            .set('Content-Type', 'anything')
+        ;
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toBe('Content-Type must be multipart/form-data');
+    });
 
     test.todo('Should return a list of users based on query params');
 });
