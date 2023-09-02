@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 export class UploadCsvMiddleware {
     public static CheckHeader(req: Request, res: Response, next: NextFunction): void {
-        if (!req.headers['content-type'] || req.headers['content-type'] !== 'multipart/form-data') {
+        if (!req.headers['content-type'] || req.headers['content-type']?.includes('multipart/form-data') === false) {
             res.status(400).send({
                 message: 'Content-Type must be multipart/form-data'
             });
