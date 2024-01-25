@@ -10,6 +10,7 @@
   },
   "scripts": {
     "start": "node ./dist/src/index.js",
+    "start:docker": "node ./dist/index.js",
     "build": "tsc",
     "dev": "ts-node-dev --respawn -- src/index.ts",
     "test": "npx jest --coverage --config jest.config.js",
