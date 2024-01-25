@@ -20,7 +20,7 @@ export class ErrorHandleMiddleware {
         }
 
         res.status(500).send({
-            message: 'Internal error'
+            message: 'Internal error. Details: ' + err
         });
     }
 }

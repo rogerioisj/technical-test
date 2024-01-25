@@ -67,8 +67,8 @@ export class UserController {
 
             res.status(201).send(`Users created`);
         } catch (e) {
-            console.log('ERROR', e)
-            res.status(500).send('Internal error');
+            console.error('ERROR', e)
+            res.status(500).send('Internal error: Details: ' + e);
         }
     }
 
