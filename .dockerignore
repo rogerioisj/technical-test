@@ -1,0 +1,8 @@
+temp/
+node_modules/
+test/
+jest.config.js
+.git/
+dist/
+Dockerfile
+Readme.md
