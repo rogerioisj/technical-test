@@ -2,7 +2,7 @@ FROM node:20.11.0-alpine
 
 USER node
 
-RUN mkdir -p /home/node/app
+RUN mkdir -p /home/node/app/temp
 
 WORKDIR /home/node/app
 
